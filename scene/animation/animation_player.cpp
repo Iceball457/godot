@@ -502,21 +502,9 @@ void AnimationPlayer::play_section(const StringName &p_name, double p_start_time
 		playback_queue.clear();
 	}
 
-	if (c.assigned != name) { // Reset.
-		c.current.pos = p_from_end ? end : start;
-		c.assigned = name;
-		emit_signal(SNAME("current_animation_changed"), c.assigned);
-	} else {
-		if (p_from_end && Math::is_equal_approx(c.current.pos, start)) {
-			// Animation reset but played backwards, set position to the end.
-			seek_internal(end, true, true, true);
-		} else if (!p_from_end && Math::is_equal_approx(c.current.pos, end)) {
-			// Animation resumed but already ended, set position to the beginning.
-			seek_internal(start, true, true, true);
-		} else if (playing) {
-			return;
-		}
-	}
+	c.current.pos = p_from_end ? end : start;
+	c.assigned = name;
+	emit_signal(SNAME("current_animation_changed"), c.assigned);
 
 	c.seeked = false;
 	c.started = true;
@@ -586,11 +574,9 @@ void AnimationPlayer::set_current_animation(const String &p_animation) {
 		stop();
 	} else if (!is_playing()) {
 		play(p_animation);
-	} else if (playback.assigned != p_animation) {
+	} else {
 		float speed = playback.current.speed_scale;
 		play(p_animation, -1.0, speed, signbit(speed));
-	} else {
-		// Same animation, do not replay from start.
 	}
 }
 
